@@ -76,6 +76,7 @@ app.get('/api/department/:id', (req, res) => {
     });
 });
 
+// Get a single role
 app.get('/api/role/:id', (req, res) => {
     const sql = `SELECT role.*, department.name 
              AS department_name 
@@ -125,7 +126,7 @@ app.post('/api/department', ({ body }, res) => {
     if (errors) {
         res.status(400).json({ error: errors });
         return;
-    } 
+    }
     const sql = `INSERT INTO department (name)
     VALUES (?)`;
     const params = [body.name];
@@ -148,11 +149,11 @@ app.post('/api/role', ({ body }, res) => {
     if (errors) {
         res.status(400).json({ error: errors });
         return;
-    } 
+    }
     const sql = `INSERT INTO role (title,salary)
     VALUES (?,?)`;
     const params = [body.title,
-                    body.salary];
+    body.salary];
 
     db.query(sql, params, (err, result) => {
         if (err) {
@@ -166,10 +167,61 @@ app.post('/api/role', ({ body }, res) => {
     });
 });
 
+//Delete a role
+app.delete('/api/role/:id', (req, res) => {
+    const sql = `DELETE FROM role WHERE id = ?`;
+    const params = [req.params.id];
+    db.query(sql, params, (err, result) => {
+        if (err) {
+            res.status(400).json({ error: res.message });
+            // checks if anything was deleted
+        } else if (!result.affectedRows) {
+            res.json({
+                message: 'role not found'
+            });
+        } else {
+            res.json({
+                message: 'deleted',
+                changes: result.affectedRows,
+                id: req.params.id
+            });
+        }
+    });
+});
+
+// Update a role
+app.put('/api/role/:id', (req, res) => {
+    const errors = inputCheck(req.body, 'departmentgit _id');
+
+    if (errors) {
+        res.status(400).json({ error: errors });
+        return;
+    }
+    const sql = `UPDATE role SET department_id = ? 
+                 WHERE id = ?`;
+    const params = [req.body.department_id, req.params.id];
+    db.query(sql, params, (err, result) => {
+        if (err) {
+            res.status(400).json({ error: err.message });
+            // check if a record was found
+        } else if (!result.affectedRows) {
+            res.json({
+                message: 'Candidate not found'
+            });
+        } else {
+            res.json({
+                message: 'success',
+                data: req.body,
+                changes: result.affectedRows
+            });
+        }
+    });
+});
+
 // Default response for any other request (Not Found)
 app.use((req, res) => {
     res.status(404).end();
-  });
+});
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
