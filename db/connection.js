@@ -7,8 +7,8 @@ const db = mysql.createConnection(
         // Your MySQL username,
         user: process.env.DB_USER,
         // Your MySQL password
-        password: process.env.DB_Key ||'landon12!',
-        database: process.env.DB_NAME
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
     },
     console.log('Connected to the department database.')
 );
